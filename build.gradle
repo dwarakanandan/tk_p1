@@ -1,0 +1,27 @@
+apply plugin: 'java'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+// In this section you declare the required dependencies of your project
+dependencies {
+    compile 'org.apache.commons:commons-math3:3.6.1'
+}
+
+// You can define a tasks that run your application
+task start_server(type: JavaExec) {
+	description = 'Starts the Server side of this application'
+	classpath = sourceSets.main.runtimeClasspath
+	
+	main = 'group.ten.p1.server.ServerApp'
+}
+
+task start_client(type: JavaExec) {
+	description = 'Starts the Client side of this application'
+	classpath = sourceSets.main.runtimeClasspath
+	
+	main = 'group.ten.p1.client.ClientApp'
+}
