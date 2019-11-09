@@ -23,5 +23,5 @@ task start_client(type: JavaExec) {
 	description = 'Starts the Client side of this application'
 	classpath = sourceSets.main.runtimeClasspath
 	
-	main = 'group.ten.p1.client.ClientApp'
+	main = 'group.ten.p1.client.ClientMain'
 }
