@@ -2,11 +2,18 @@ package group.ten.p1.client;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
 import java.awt.event.ActionEvent;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+
+import group.ten.p1.shared.FlightDetails;
+import group.ten.p1.shared.FlightStatus;
 
 public class ClientMain extends JFrame {
 
@@ -15,6 +22,7 @@ public class ClientMain extends JFrame {
 	private JTable table;
 	private JDialog dialog;
 	private JButton btnNew,btnEdit,btnDelete;
+	private ArrayList<FlightDetails> flightDetailsTable = new ArrayList<>();
 
 	/**
 	 * Launch the application.
@@ -74,9 +82,9 @@ public class ClientMain extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				DetailsDialog dialog = new DetailsDialog();
 				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-				dialog.setVisible(true);
 				dialog.setLocationRelativeTo(frame);
 				dialog.setResizable(false);
+				dialog.setVisible(true);
 			}
 		});
 
@@ -84,7 +92,15 @@ public class ClientMain extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("Clicked btnEdit");
+				if (table.getSelectedRow()>=0) {
+					FlightDetails selectedFlight = flightDetailsTable.get(table.getSelectedRow());
+					DetailsDialog dialog = new DetailsDialog();
+					dialog.initializeDialog(selectedFlight);
+					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+					dialog.setLocationRelativeTo(frame);
+					dialog.setResizable(false);
+					dialog.setVisible(true);
+				}
 			}
 		});
 
@@ -94,6 +110,7 @@ public class ClientMain extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (table.getSelectedRow()>=0) {
 					((DefaultTableModel)table.getModel()).removeRow(table.getSelectedRow());
+					flightDetailsTable.remove(table.getSelectedRow());
 				}
 			}
 		});
@@ -101,8 +118,8 @@ public class ClientMain extends JFrame {
 
 	private void setupJTable() {
 		// Column Names 
-		String[] columnNames = { "Operating airline", "Flight Number", "Departure",
-			 "Arrival", "Estimated Departure Time", "Estimated Arrival Time", "Terminal" };
+		String[] columnNames = { "Operating airline", "IATA Code", "Tracking Number","Departure",
+			 "Arrival", "Estimated Departure Time", "Estimated Arrival Time"};
 
 
 		DefaultTableModel tableModel = new DefaultTableModel(null, columnNames) {
@@ -113,6 +130,12 @@ public class ClientMain extends JFrame {
 			return false;
 			}
 		};
+
+		FlightDetails flight = getFlight();
+		tableModel.addRow(new Object[]{flight.getOperatingAirline(), flight.getIATACode(), flight.getTrackingNumber(),flight.getDepartureAirport(),
+			flight.getArrivalAirport(), flight.getEstimatedDeparture(), flight.getEstimatedArrival()});
+
+		flightDetailsTable.add(flight);
 
 		table = new JTable(null, columnNames);
 		table.setModel(tableModel);
@@ -127,4 +150,31 @@ public class ClientMain extends JFrame {
 		
 		scrollPane.setViewportView(table);
 	}
+
+	private FlightDetails getFlight() {
+		Instant instant = Instant.parse("2018-08-13T17:55:00Z");
+		FlightDetails flightDetails = new FlightDetails();
+		flightDetails.setAircraftModel("A380");
+		flightDetails.setArrivalAirport("FRA");
+		flightDetails.setArrivalGates("C15A");
+		flightDetails.setArrivalTerminal(1);
+		flightDetails.setCheckinCounter("664-666");
+		flightDetails.setCheckinEnd(instant);
+		flightDetails.setCheckinLocation(1);
+		flightDetails.setCheckinStart(instant);
+		flightDetails.setDepartureAirport("BOM");
+		flightDetails.setDepartureGates("C14");
+		flightDetails.setDepartureTerminal(2);
+		flightDetails.setEstimatedArrival(instant);
+		flightDetails.setEstimatedDeparture(instant);
+		flightDetails.setIATACode("LH");
+		flightDetails.setOperatingAirline("Lufthansa");
+		flightDetails.setOriginDate(LocalDate.now());
+		flightDetails.setScheduledArrival(instant);
+		flightDetails.setScheduledDeparture(instant);
+		flightDetails.setTrackingNumber(591);
+		flightDetails.setFlightStatus(FlightStatus.fromInt(8));
+		return flightDetails;
+	}
+
 }

@@ -7,12 +7,16 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+
+import group.ten.p1.shared.FlightDetails;
+
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import java.awt.Font;
 import javax.swing.JComboBox;
 
 public class DetailsDialog extends JDialog {
+	
 	private JTextField tbIATACode;
 	private JTextField tbOperatingAirline;
 	private JTextField tbAircraftModel;
@@ -32,6 +36,31 @@ public class DetailsDialog extends JDialog {
 	private JTextField tbEstimatedArrival;
 	private JTextField tbCheckinCounter;
 	private JTextField tbCheckinEnd;
+	private JComboBox comboBox;
+
+	public void initializeDialog(FlightDetails flightDetails) {
+		tbIATACode.setText(flightDetails.getIATACode());
+		tbOperatingAirline.setText(flightDetails.getOperatingAirline());
+		tbAircraftModel.setText(flightDetails.getAircraftModel());
+		tbDepartureAirport.setText(flightDetails.getDepartureAirport());
+		tbOriginDate.setText(flightDetails.getOriginDate().toString());
+		tbScheduledDeparture.setText(flightDetails.getScheduledDeparture().toString());
+		tbDepartureTerminal.setText(String.valueOf(flightDetails.getDepartureTerminal()));
+		tbDepartureGates.setText(flightDetails.getDepartureGates());
+		tbEstimatedDeparture.setText(flightDetails.getEstimatedDeparture().toString());
+		tbCheckinLocation.setText(String.valueOf(flightDetails.getCheckinLocation()));
+		tbCheckinStart.setText(flightDetails.getCheckinStart().toString());
+		tbTrackingNumber.setText(String.valueOf(flightDetails.getTrackingNumber()));
+		tbArrivalAirport.setText(flightDetails.getArrivalAirport());
+		tbScheduledArrival.setText(flightDetails.getScheduledArrival().toString());
+		tbArrivalTerminal.setText(String.valueOf(flightDetails.getArrivalTerminal()));
+		tbArrivalGates.setText(flightDetails.getArrivalGates());
+		tbEstimatedArrival.setText(flightDetails.getEstimatedArrival().toString());
+		tbCheckinCounter.setText(flightDetails.getCheckinCounter());
+		tbCheckinEnd.setText(flightDetails.getCheckinEnd().toString());
+		comboBox.setSelectedIndex(flightDetails.getFlightStatus().getValue());
+	}
+
 	/**
 	 * Create the dialog.
 	 */
@@ -184,7 +213,7 @@ public class DetailsDialog extends JDialog {
 			"'X' = Canceled flight for which there may be a replacement",
 			"'Y' = Return to stand",
 			"'Z' = Returned to apron"};
-		JComboBox comboBox = new JComboBox(comboBoxItems);
+		comboBox = new JComboBox(comboBoxItems);
 		comboBox.setFont(new Font("Consolas", Font.PLAIN, 16));
 		comboBox.setBounds(269, 484, 457, 22);
 		getContentPane().add(comboBox);
