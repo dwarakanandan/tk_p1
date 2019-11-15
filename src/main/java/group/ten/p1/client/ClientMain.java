@@ -12,10 +12,14 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
+import group.ten.p1.server.ServerInterface;
 import group.ten.p1.shared.FlightDetails;
 import group.ten.p1.shared.FlightStatus;
 
-public class ClientMain extends JFrame {
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
+public class ClientMain extends JFrame{
 
 	private ClientMain frame;
 	private JPanel contentPane;
@@ -28,6 +32,14 @@ public class ClientMain extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+			Registry registry = LocateRegistry.getRegistry();
+			ServerInterface stub = (ServerInterface) registry.lookup("TK Airport");
+		} catch (Exception e){
+			System.err.println("Client exception: " + e.toString());
+			e.printStackTrace();
+		}
+
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

@@ -2,6 +2,7 @@
 .settings
 .vscode
 .classpath
+.idea
 /build/
 
 # Ignore Gradle GUI config
