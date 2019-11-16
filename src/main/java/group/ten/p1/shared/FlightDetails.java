@@ -1,9 +1,14 @@
 package group.ten.p1.shared;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDate;
 
-public class FlightDetails {
+public class FlightDetails implements Serializable {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
     private String iATACode;
 	private String operatingAirline;
 	private String aircraftModel;
