@@ -109,7 +109,7 @@ public class DetailsDialog extends JDialog {
 						dispose();
 					} else {
 						dispose();
-						JLabel label = new JLabel("Flight with same IATA Code and Tracking number already exists !!");
+						JLabel label = new JLabel("Flight with that IATA Code and Tracking number already exists on "+flight.getOriginDate().toString()+" !!");
 						label.setFont(new Font("Consolas", Font.PLAIN, 16));
 						JOptionPane.showMessageDialog(null, label, "ERROR" , JOptionPane.WARNING_MESSAGE);
 					}
@@ -397,7 +397,7 @@ public class DetailsDialog extends JDialog {
 		if (isEdit) {
 			return true;
 		}
-		String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+		String flightKey = flight.getUniqueCode();
 		if (clientMainHandler.clientCommunicator.flights.containsKey(flightKey)) {
 			return false;
 		}

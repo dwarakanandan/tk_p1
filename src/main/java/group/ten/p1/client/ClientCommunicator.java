@@ -24,7 +24,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    static final String CLIENT_TAG = "[CLIENT] : ";
+    String CLIENT_TAG = "[CLIENT] : ";
     LinkedHashMap<String, FlightDetails> flights = new LinkedHashMap<>();
     String clientId;
     ServerInterface serverHandle;
@@ -38,6 +38,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
             Registry registry = LocateRegistry.getRegistry(Constants.RMI_PORT);
             this.serverHandle = (ServerInterface) registry.lookup(Constants.RMI_IDENTIFIER);
             this.clientId = Long.toString(System.currentTimeMillis());
+            this.CLIENT_TAG =  "[CLIENT] [" + this.clientId+ "] :";
         } catch (Exception e) {
             //System.err.println("Client exception: " + e.toString());
         }
@@ -103,11 +104,10 @@ public class ClientCommunicator implements ClientInterface, Serializable {
 
     @Override
     public void receiveUpdatedFlight(FlightDetails flight, boolean deleted) throws RemoteException {
-        String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+        String flightKey = flight.getUniqueCode();
         System.out.println(CLIENT_TAG + "Got flight update for "+flightKey+" deleted: " + deleted);
         int pos = new ArrayList<String>(flights.keySet()).indexOf(flightKey);
-        System.out.println(pos);
-        System.out.println(flights.keySet().toString());
+        
         if (pos>=0) {
             ((DefaultTableModel) table.getModel()).removeRow(pos);
             flightDetailsTable.remove(pos);

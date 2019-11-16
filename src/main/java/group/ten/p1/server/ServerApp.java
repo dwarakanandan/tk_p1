@@ -38,7 +38,7 @@ public class ServerApp implements ServerInterface{
 
     ServerApp() {
         FlightDetails dummyFlight = getDummyFlight();
-        String flightKey = dummyFlight.getIATACode() + dummyFlight.getTrackingNumber();
+        String flightKey = dummyFlight.getUniqueCode();
         flights.put(flightKey, dummyFlight);
     }
 
@@ -81,7 +81,7 @@ public class ServerApp implements ServerInterface{
     };
 
     public void updateFlight(String clientName, FlightDetails flight) throws RemoteException {
-        String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+        String flightKey = flight.getUniqueCode();
         System.out.println(SERVER_TAG + "Client " + clientName + " updated flight " + flightKey + "\n");
         flights.replace(flightKey, flight);
         for(ClientInterface client: clients.values()) {
@@ -90,7 +90,7 @@ public class ServerApp implements ServerInterface{
     };
 
     public void deleteFlight(String clientName, FlightDetails flight) throws RemoteException {
-        String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+        String flightKey = flight.getUniqueCode();
         System.out.println(SERVER_TAG + "Client " + clientName + " deleted flight " + flightKey + "\n");
         flights.remove(flightKey);
         for(ClientInterface client: clients.values()) {
