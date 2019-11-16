@@ -12,16 +12,16 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class ServerApp implements ServerInterface{
 
-    HashMap<String, FlightDetails> flights = new HashMap<>();
-    HashMap<String, ClientInterface> clients = new HashMap<>();
+    LinkedHashMap<String, FlightDetails> flights = new LinkedHashMap<>();
+    LinkedHashMap<String, ClientInterface> clients = new LinkedHashMap<>();
+    static final String SERVER_TAG = "[SERVER] : ";
     
     public static void main(String[] args) {
-        System.out.println("Starting Server.");
+        System.out.println(SERVER_TAG + "Starting Server...\n");
 
         try {
             ServerApp server = new ServerApp();
@@ -30,8 +30,8 @@ public class ServerApp implements ServerInterface{
             Registry registry = LocateRegistry.getRegistry(Constants.RMI_PORT);
             registry.bind(Constants.RMI_IDENTIFIER, stub);
         } catch (Exception e){
-            System.err.println("Server exception: " + e.toString());
-            e.printStackTrace();
+            System.err.println(SERVER_TAG + " [ERROR] Could not start Server. Please try running the program again... ");
+            System.exit(1);
         }
 
     }
@@ -44,7 +44,7 @@ public class ServerApp implements ServerInterface{
 
     public void login(String clientName, Remote clientCommunicatorRemote) throws RemoteException {
         ClientInterface clientInterface = (ClientInterface) clientCommunicatorRemote;
-        System.out.println("Client logged in with "+clientName);
+        System.out.println(SERVER_TAG + "Client logged in with ID:" + clientName + "\n");
         clients.put(clientName, clientInterface);
         clientInterface.receiveListOfFlights(flights);
     };
@@ -76,12 +76,13 @@ public class ServerApp implements ServerInterface{
 	}
 
     public void logout(String clientName) {
-        System.out.println("Client logged out with "+clientName);
+        System.out.println(SERVER_TAG + "Client logged out with ID: " + clientName + "\n");
         clients.remove(clientName);
     };
 
     public void updateFlight(String clientName, FlightDetails flight) throws RemoteException {
         String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+        System.out.println(SERVER_TAG + "Client " + clientName + " updated flight " + flightKey + "\n");
         flights.replace(flightKey, flight);
         for(ClientInterface client: clients.values()) {
             client.receiveUpdatedFlight(flight, false);
@@ -90,6 +91,7 @@ public class ServerApp implements ServerInterface{
 
     public void deleteFlight(String clientName, FlightDetails flight) throws RemoteException {
         String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+        System.out.println(SERVER_TAG + "Client " + clientName + " deleted flight " + flightKey + "\n");
         flights.remove(flightKey);
         for(ClientInterface client: clients.values()) {
             client.receiveUpdatedFlight(flight, true);

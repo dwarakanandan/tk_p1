@@ -2,6 +2,10 @@ package group.ten.p1.client;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.time.Instant;
+import java.time.LocalDate;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -9,8 +13,10 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import group.ten.p1.shared.FlightDetails;
+import group.ten.p1.shared.FlightStatus;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import java.awt.Font;
 import javax.swing.JComboBox;
@@ -64,32 +70,65 @@ public class DetailsDialog extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public DetailsDialog() {
+	public DetailsDialog(ClientMain clientMainHandler, Boolean isEdit) {
 		JPanel contentPanel = new JPanel();
 		setBounds(100, 100, 950, 610);
 		contentPanel.setLayout(new FlowLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		getContentPane().setLayout(null);
+		JButton saveButton, cancelButton;
 		{
 			JPanel buttonPane = new JPanel();
 			buttonPane.setBounds(0, 518, 895, 35);
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane);
 			{
-				JButton saveButton = new JButton("Save");
+				saveButton = new JButton("Save");
 				saveButton.setFont(new Font("Tahoma", Font.PLAIN, 16));
 				saveButton.setActionCommand("OK");
 				buttonPane.add(saveButton);
 				getRootPane().setDefaultButton(saveButton);
 			}
 			{
-				JButton cancelButton = new JButton("Cancel");
+				cancelButton = new JButton("Cancel");
 				cancelButton.setFont(new Font("Tahoma", Font.PLAIN, 16));
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
 		}
+
+		saveButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				FlightDetails flight = getFlightDetails();
+				if ( flight != null) {
+					if (isValidFlight(clientMainHandler, flight, isEdit)) {
+						clientMainHandler.clientCommunicator.updateFlight(flight);
+						dispose();
+					} else {
+						dispose();
+						JLabel label = new JLabel("Flight with same IATA Code and Tracking number already exists !!");
+						label.setFont(new Font("Consolas", Font.PLAIN, 16));
+						JOptionPane.showMessageDialog(null, label, "ERROR" , JOptionPane.WARNING_MESSAGE);
+					}
+				} else {
+					dispose();
+					JLabel label = new JLabel("Incorrect values entered !!");
+					label.setFont(new Font("Consolas", Font.PLAIN, 16));
+					JOptionPane.showMessageDialog(null, label, "ERROR" , JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
+
+		cancelButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
 		
 		JLabel lblIataCode = new JLabel("IATA Code :");
 		lblIataCode.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -101,6 +140,7 @@ public class DetailsDialog extends JDialog {
 		tbIATACode.setBounds(269, 49, 161, 22);
 		getContentPane().add(tbIATACode);
 		tbIATACode.setColumns(10);
+		if (isEdit) tbIATACode.setEditable(false);
 		
 		JLabel lblOperatingAirline = new JLabel("Operating Airline :");
 		lblOperatingAirline.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -112,6 +152,7 @@ public class DetailsDialog extends JDialog {
 		tbOperatingAirline.setColumns(10);
 		tbOperatingAirline.setBounds(734, 49, 161, 22);
 		getContentPane().add(tbOperatingAirline);
+		if (isEdit) tbOperatingAirline.setEditable(false);
 		
 		JLabel lblAircraftModel = new JLabel("Aircraft Model :");
 		lblAircraftModel.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -277,6 +318,7 @@ public class DetailsDialog extends JDialog {
 		tbTrackingNumber.setColumns(10);
 		tbTrackingNumber.setBounds(734, 93, 161, 22);
 		getContentPane().add(tbTrackingNumber);
+		if (isEdit) tbTrackingNumber.setEditable(false);
 		
 		tbArrivalAirport = new JTextField();
 		tbArrivalAirport.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -319,5 +361,46 @@ public class DetailsDialog extends JDialog {
 		tbCheckinEnd.setColumns(10);
 		tbCheckinEnd.setBounds(734, 433, 161, 22);
 		getContentPane().add(tbCheckinEnd);
+	}
+
+	private FlightDetails getFlightDetails() {
+		FlightDetails flightDetails = new FlightDetails();
+		try {
+			flightDetails.setAircraftModel(tbAircraftModel.getText());
+			flightDetails.setArrivalAirport(tbArrivalAirport.getText());
+			flightDetails.setArrivalGates(tbArrivalGates.getText());
+			flightDetails.setArrivalTerminal(Integer.parseInt(tbArrivalTerminal.getText()));
+			flightDetails.setCheckinCounter(tbCheckinCounter.getText());
+			flightDetails.setCheckinEnd(Instant.parse(tbCheckinEnd.getText()));
+			flightDetails.setCheckinLocation(Integer.parseInt(tbCheckinLocation.getText()));
+			flightDetails.setCheckinStart(Instant.parse(tbCheckinStart.getText()));
+			flightDetails.setDepartureAirport(tbDepartureAirport.getText());
+			flightDetails.setDepartureGates(tbDepartureGates.getText());
+			flightDetails.setDepartureTerminal(Integer.parseInt(tbDepartureTerminal.getText()));
+			flightDetails.setEstimatedArrival(Instant.parse(tbEstimatedArrival.getText()));
+			flightDetails.setEstimatedDeparture(Instant.parse(tbEstimatedDeparture.getText()));
+			flightDetails.setIATACode(tbIATACode.getText());
+			flightDetails.setOperatingAirline(tbOperatingAirline.getText());
+			flightDetails.setOriginDate(LocalDate.parse(tbOriginDate.getText()));
+			flightDetails.setScheduledArrival(Instant.parse(tbScheduledArrival.getText()));
+			flightDetails.setScheduledDeparture(Instant.parse(tbScheduledDeparture.getText()));
+			flightDetails.setTrackingNumber(Integer.parseInt(tbTrackingNumber.getText()));
+			flightDetails.setFlightStatus(FlightStatus.fromInt(comboBox.getSelectedIndex()));
+			
+		} catch (Exception e) {
+			return null;
+		}
+		return flightDetails;
+	}
+
+	private Boolean isValidFlight(ClientMain clientMainHandler, FlightDetails flight, Boolean isEdit) {
+		if (isEdit) {
+			return true;
+		}
+		String flightKey = flight.getIATACode() + flight.getTrackingNumber();
+		if (clientMainHandler.clientCommunicator.flights.containsKey(flightKey)) {
+			return false;
+		}
+		return true;
 	}
 }

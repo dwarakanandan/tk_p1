@@ -4,15 +4,19 @@ import group.ten.p1.server.ServerInterface;
 import group.ten.p1.shared.Constants;
 import group.ten.p1.shared.FlightDetails;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.net.Socket;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
 
+import javax.swing.JFrame;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 public class ClientCommunicator implements ClientInterface, Serializable {
 
@@ -20,10 +24,14 @@ public class ClientCommunicator implements ClientInterface, Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-    HashMap<String, FlightDetails> flights = new HashMap<>();
+    static final String CLIENT_TAG = "[CLIENT] : ";
+    LinkedHashMap<String, FlightDetails> flights = new LinkedHashMap<>();
     String clientId;
     ServerInterface serverHandle;
     JTable table;
+    JFrame frame;
+    ArrayList<FlightDetails> flightDetailsTable;
+    
     
     public ClientCommunicator() {
         try {
@@ -31,21 +39,33 @@ public class ClientCommunicator implements ClientInterface, Serializable {
             this.serverHandle = (ServerInterface) registry.lookup(Constants.RMI_IDENTIFIER);
             this.clientId = Long.toString(System.currentTimeMillis());
         } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
-            e.printStackTrace();
+            //System.err.println("Client exception: " + e.toString());
         }
     }
 
-    public void setTable(JTable table) {
+    public void setAttributes(JTable table, ArrayList<FlightDetails> flightDetailsTable) {
         this.table = table;
+        this.flightDetailsTable = flightDetailsTable;
     }
 
     public void login() {
         try {
-            serverHandle.login(this.clientId, UnicastRemoteObject.exportObject(this, Constants.RMI_PORT + new Random().nextInt(100)));
+            int portNum = Constants.RMI_PORT;
+            for(int i=0;i<100;i++) {
+                if (available(portNum)) break;
+                portNum++;
+            }
+            serverHandle.login(this.clientId, UnicastRemoteObject.exportObject(this, portNum));
         } catch (RemoteException e) {
-            System.err.println("Client login exception: " + e.toString());
-            e.printStackTrace();
+            //System.err.println("Client login exception: " + e.toString());
+        }
+    }
+
+    private boolean available(int port) {
+        try (Socket ignored = new Socket("localhost", port)) {
+            return false;
+        } catch (IOException ignored) {
+            return true;
         }
     }
 
@@ -53,8 +73,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
         try {
             serverHandle.logout(this.clientId);
         } catch (RemoteException e) {
-            System.err.println("Client logout exception: " + e.toString());
-            e.printStackTrace();
+            //System.err.println("Client logout exception: " + e.toString());
         }
     }
 
@@ -77,22 +96,31 @@ public class ClientCommunicator implements ClientInterface, Serializable {
     }
 
     @Override
-    public void receiveListOfFlights(HashMap<String, FlightDetails> flights) throws RemoteException {
-        System.out.println("Got list of flights");
+    public void receiveListOfFlights(LinkedHashMap<String, FlightDetails> flights) throws RemoteException {
+        System.out.println(CLIENT_TAG + "Got list of flights\n");
         this.flights = flights;
     }
 
     @Override
     public void receiveUpdatedFlight(FlightDetails flight, boolean deleted) throws RemoteException {
-        System.out.println("Got flight update");
         String flightKey = flight.getIATACode() + flight.getTrackingNumber();
-        flights.remove(flightKey);
-        if (deleted) {
-            flights.remove(flightKey);
-        } else {
-            flights.replace(flightKey, flight);
+        System.out.println(CLIENT_TAG + "Got flight update for "+flightKey+" deleted: " + deleted);
+        int pos = new ArrayList<String>(flights.keySet()).indexOf(flightKey);
+        System.out.println(pos);
+        System.out.println(flights.keySet().toString());
+        if (pos>=0) {
+            ((DefaultTableModel) table.getModel()).removeRow(pos);
+            flightDetailsTable.remove(pos);
         }
-        this.table.repaint();
+        
+        flights.remove(flightKey);
+
+        if (! deleted) {
+            flights.put(flightKey, flight);
+            ((DefaultTableModel)table.getModel()).addRow(new Object[]{flight.getOperatingAirline(), flight.getIATACode(), flight.getTrackingNumber(),flight.getDepartureAirport(),
+                flight.getArrivalAirport(), flight.getEstimatedDeparture(), flight.getEstimatedArrival()});
+            flightDetailsTable.add(flight);
+        }
     }
 
 }

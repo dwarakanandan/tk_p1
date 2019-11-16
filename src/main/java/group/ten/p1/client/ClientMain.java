@@ -16,7 +16,7 @@ import group.ten.p1.shared.FlightStatus;
 
 public class ClientMain extends JFrame {
 
-	private ClientMain frame;
+	private JFrame frame;
 	public JPanel contentPane;
 	public JTable table;
 	private JDialog dialog;
@@ -28,28 +28,33 @@ public class ClientMain extends JFrame {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		ClientCommunicator clientCommunicator = new ClientCommunicator();
-		clientCommunicator.login();
-
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					ClientMain currentFrame = new ClientMain(clientCommunicator);
-					clientCommunicator.setTable(currentFrame.table);
-					currentFrame.frame = currentFrame;
-					currentFrame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
+		try {
+			ClientCommunicator clientCommunicator = new ClientCommunicator();
+			
+			clientCommunicator.login();
+			
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						ClientMain currentFrame = new ClientMain(clientCommunicator);
+						currentFrame.frame = currentFrame;
+						clientCommunicator.setAttributes(currentFrame.table, currentFrame.flightDetailsTable);
+						currentFrame.setVisible(true);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		});
+			});
 
-		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() {
-				clientCommunicator.logout();
-			}
-		});
-
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				public void run() {
+					clientCommunicator.logout();
+				}
+			});
+		} catch (Exception e) {
+			System.err.println("[CLIENT] Could not bind to RMI Interface: TK_AIRPORT. Please start the server first..");
+			System.exit(1);
+		}
 	}
 
 	/**
@@ -92,7 +97,8 @@ public class ClientMain extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				DetailsDialog dialog = new DetailsDialog();
+				DetailsDialog dialog = new DetailsDialog(ClientMain.this, false);
+				dialog.initializeDialog(getDummyFlight());
 				dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 				dialog.setLocationRelativeTo(frame);
 				dialog.setResizable(false);
@@ -106,7 +112,7 @@ public class ClientMain extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (table.getSelectedRow() >= 0) {
 					FlightDetails selectedFlight = flightDetailsTable.get(table.getSelectedRow());
-					DetailsDialog dialog = new DetailsDialog();
+					DetailsDialog dialog = new DetailsDialog(ClientMain.this, true);
 					dialog.initializeDialog(selectedFlight);
 					dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					dialog.setLocationRelativeTo(frame);
@@ -122,8 +128,7 @@ public class ClientMain extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				int selectedRow = table.getSelectedRow();
 				if (selectedRow >= 0) {
-					((DefaultTableModel) table.getModel()).removeRow(selectedRow);
-					flightDetailsTable.remove(selectedRow);
+					clientCommunicator.deleteFlight(flightDetailsTable.get(selectedRow));
 				}
 			}
 		});
@@ -161,6 +166,32 @@ public class ClientMain extends JFrame {
 		contentPane.add(scrollPane);
 		
 		scrollPane.setViewportView(table);
+	}
+
+	private FlightDetails getDummyFlight() {
+		Instant instant = Instant.parse("2019-01-01T00:00:00Z");
+		FlightDetails flightDetails = new FlightDetails();
+		flightDetails.setAircraftModel("A380");
+		flightDetails.setArrivalAirport("AAA");
+		flightDetails.setArrivalGates("A11A");
+		flightDetails.setArrivalTerminal(1);
+		flightDetails.setCheckinCounter("111-111");
+		flightDetails.setCheckinEnd(instant);
+		flightDetails.setCheckinLocation(1);
+		flightDetails.setCheckinStart(instant);
+		flightDetails.setDepartureAirport("AAA");
+		flightDetails.setDepartureGates("A11");
+		flightDetails.setDepartureTerminal(1);
+		flightDetails.setEstimatedArrival(instant);
+		flightDetails.setEstimatedDeparture(instant);
+		flightDetails.setIATACode("AA");
+		flightDetails.setOperatingAirline("Dummy");
+		flightDetails.setOriginDate(LocalDate.now());
+		flightDetails.setScheduledArrival(instant);
+		flightDetails.setScheduledDeparture(instant);
+		flightDetails.setTrackingNumber(1111);
+		flightDetails.setFlightStatus(FlightStatus.fromInt(0));
+		return flightDetails;
 	}
 
 }
