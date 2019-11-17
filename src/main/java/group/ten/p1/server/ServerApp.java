@@ -29,6 +29,7 @@ public class ServerApp implements ServerInterface{
             LocateRegistry.createRegistry(Constants.RMI_PORT);
             Registry registry = LocateRegistry.getRegistry(Constants.RMI_PORT);
             registry.bind(Constants.RMI_IDENTIFIER, stub);
+            System.out.println(SERVER_TAG + "Server started successfully...\n");
         } catch (Exception e){
             System.err.println(SERVER_TAG + " [ERROR] Could not start Server. Please try running the program again... ");
             System.exit(1);
@@ -83,7 +84,12 @@ public class ServerApp implements ServerInterface{
     public void updateFlight(String clientName, FlightDetails flight) throws RemoteException {
         String flightKey = flight.getUniqueCode();
         System.out.println(SERVER_TAG + "Client " + clientName + " updated flight " + flightKey + "\n");
-        flights.replace(flightKey, flight);
+        
+        if(flights.containsKey(flightKey))
+            flights.replace(flightKey, flight);
+        else
+            flights.put(flightKey, flight);
+
         for(ClientInterface client: clients.values()) {
             client.receiveUpdatedFlight(flight, false);
         }

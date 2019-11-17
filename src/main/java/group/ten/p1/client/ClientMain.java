@@ -39,6 +39,7 @@ public class ClientMain extends JFrame {
 						ClientMain currentFrame = new ClientMain(clientCommunicator);
 						currentFrame.frame = currentFrame;
 						clientCommunicator.setAttributes(currentFrame.table, currentFrame.flightDetailsTable);
+						currentFrame.setTitle("Client-" + clientCommunicator.clientId);
 						currentFrame.setVisible(true);
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -137,7 +138,7 @@ public class ClientMain extends JFrame {
 	private void setupJTable() {
 		// Column Names
 		String[] columnNames = { "Operating airline", "IATA Code", "Tracking Number", "Departure", "Arrival",
-				"Estimated Departure Time", "Estimated Arrival Time" };
+		"Origin date", "Estimated Departure Time", "Estimated Arrival Time" , "Status" };
 
 		DefaultTableModel tableModel = new DefaultTableModel(null, columnNames) {
 
@@ -157,7 +158,7 @@ public class ClientMain extends JFrame {
 		
 		for (FlightDetails flight : this.clientCommunicator.flights.values()) {
             ((DefaultTableModel)table.getModel()).addRow(new Object[]{flight.getOperatingAirline(), flight.getIATACode(), flight.getTrackingNumber(),flight.getDepartureAirport(),
-				flight.getArrivalAirport(), flight.getEstimatedDeparture(), flight.getEstimatedArrival()});
+				flight.getArrivalAirport(), flight.getOriginDate().toString(), flight.getEstimatedDeparture(), flight.getEstimatedArrival(), flight.getFlightStatus().toString()});
 			flightDetailsTable.add(flight);
 		}
 		

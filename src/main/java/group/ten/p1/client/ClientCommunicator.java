@@ -98,7 +98,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
 
     @Override
     public void receiveListOfFlights(LinkedHashMap<String, FlightDetails> flights) throws RemoteException {
-        System.out.println(CLIENT_TAG + "Got list of flights\n");
+        System.out.println(CLIENT_TAG + "Got list of flights. Number flights loaded: " + flights.size() + "\n");
         this.flights = flights;
     }
 
@@ -118,7 +118,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
         if (! deleted) {
             flights.put(flightKey, flight);
             ((DefaultTableModel)table.getModel()).addRow(new Object[]{flight.getOperatingAirline(), flight.getIATACode(), flight.getTrackingNumber(),flight.getDepartureAirport(),
-                flight.getArrivalAirport(), flight.getEstimatedDeparture(), flight.getEstimatedArrival()});
+                flight.getArrivalAirport(), flight.getOriginDate().toString(), flight.getEstimatedDeparture(), flight.getEstimatedArrival(), flight.getFlightStatus().toString()});
             flightDetailsTable.add(flight);
         }
     }

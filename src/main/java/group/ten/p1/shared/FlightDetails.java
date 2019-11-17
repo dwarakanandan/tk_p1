@@ -34,7 +34,7 @@ public class FlightDetails implements Serializable {
     }
 
     public String getUniqueCode() {
-        return this.iATACode + this.trackingNumber + this.originDate.toString();
+        return this.iATACode + "-" + this.trackingNumber + "-" + this.originDate.toString();
     }
 
     public String getIATACode() {

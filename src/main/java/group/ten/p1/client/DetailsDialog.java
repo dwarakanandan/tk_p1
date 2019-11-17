@@ -276,6 +276,7 @@ public class DetailsDialog extends JDialog {
 		tbOriginDate.setColumns(10);
 		tbOriginDate.setBounds(269, 179, 161, 22);
 		getContentPane().add(tbOriginDate);
+		if (isEdit) tbOriginDate.setEditable(false);
 		
 		tbScheduledDeparture = new JTextField();
 		tbScheduledDeparture.setFont(new Font("Consolas", Font.PLAIN, 16));
