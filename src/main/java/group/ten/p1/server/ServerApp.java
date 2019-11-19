@@ -13,6 +13,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ServerApp implements ServerInterface{
 
@@ -90,17 +91,27 @@ public class ServerApp implements ServerInterface{
         else
             flights.put(flightKey, flight);
 
-        for(ClientInterface client: clients.values()) {
-            client.receiveUpdatedFlight(flight, false);
-        }
+            for(Map.Entry<String, ClientInterface> client: clients.entrySet()) {
+                try {
+                    client.getValue().receiveUpdatedFlight(flight, false);
+                } catch (Exception e) {
+                    System.out.println(SERVER_TAG + "Failed to update client " + client.getKey() + " .Logging it out\n");
+                    clients.remove(client.getKey());
+                }
+            }
     };
 
     public void deleteFlight(String clientName, FlightDetails flight) throws RemoteException {
         String flightKey = flight.getUniqueCode();
         System.out.println(SERVER_TAG + "Client " + clientName + " deleted flight " + flightKey + "\n");
         flights.remove(flightKey);
-        for(ClientInterface client: clients.values()) {
-            client.receiveUpdatedFlight(flight, true);
+        for(Map.Entry<String, ClientInterface> client: clients.entrySet()) {
+            try {
+                client.getValue().receiveUpdatedFlight(flight, true);
+            } catch (Exception e) {
+                System.out.println(SERVER_TAG + "Failed to update client " + client.getKey() + " .Logging it out\n");
+                clients.remove(client.getKey());
+            }
         }
     };
 }

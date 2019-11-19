@@ -83,7 +83,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
             serverHandle.updateFlight(this.clientId, flight);
         } catch (RemoteException e) {
             System.err.println("Client updateFlight exception: " + e.toString());
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -92,7 +92,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
             serverHandle.deleteFlight(this.clientId, flight);
         } catch (RemoteException e) {
             System.err.println("Client deleteFlight exception: " + e.toString());
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -105,7 +105,7 @@ public class ClientCommunicator implements ClientInterface, Serializable {
     @Override
     public void receiveUpdatedFlight(FlightDetails flight, boolean deleted) throws RemoteException {
         String flightKey = flight.getUniqueCode();
-        System.out.println(CLIENT_TAG + "Got flight update for "+flightKey+" deleted: " + deleted);
+        System.out.println(CLIENT_TAG + "Got flight update for "+flightKey+" deleted: " + deleted + "\n");
         int pos = new ArrayList<String>(flights.keySet()).indexOf(flightKey);
         
         if (pos>=0) {
